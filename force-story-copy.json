@@ -1,0 +1,12 @@
+{
+  "chapters": [
+    {"title":"A light touch","text":"For a delicate surface. Gentle pressure."},
+    {"title":"More pressure","text":"For stubborn residue. Strong pressure."},
+    {"title":"A gentle grip","text":"For a lightweight paper box."},
+    {"title":"A stronger grip","text":"For a heavier, reinforced box."},
+    {"title":"A gentle press.","text":"With the cardboard box at the rim, the hand presses gently against it."},
+    {"title":"A firmer press.","text":"A metal box illustrates a more robust object. Compare the issued and measured forces."}
+  ],
+  "illustration_note":"Props and shelf placement are illustrative; policy observations, physical loads, robot motion and recorded forces are unchanged.",
+  "ending":{"title":"Opt2VLA","text":"Language-conditioned motion. Force-aware interaction."}
+}

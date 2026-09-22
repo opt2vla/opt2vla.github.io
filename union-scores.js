@@ -1,0 +1,8 @@
+export const esc=t=>String(t).replace(/[&<>"']/g,a=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[a]),fmt=t=>Number.isFinite(t)?t.toFixed(2):"Unavailable";const s=(t,a)=>`<span class="gate-badge ${t?"pass":"fail"}">${a}: ${t?"pass":"fail"}</span>`;export function unionReceipt(t){const a=Object.entries(t.per_hand);return`<h3>${esc(t.checkpoint)} \xB7 scene ${String(t.reference).padStart(2,"0")}</h3><details><summary>Episode scores</summary>
+ <p>${[["task","Task"],["intent","Force intent"],["tracking","Tracking"]].map(([n,e])=>s(t.independent_gates[n],e)).join(" ")} ${s(["task","intent","tracking"].every(n=>t.independent_gates[n]),"Joint success")}</p>
+ <p>Force intent and tracking use pooled samples from all command-active windows in the full episode, including unsuccessful attempts and contact loss. Task success requires one command-associated completion; joint success requires all three gates.</p>
+ <p>${t.window_count} command windows \xB7 ${fmt(t.union_duration_s)} s included \xB7 intent band ${esc(t.band_text)}.</p>
+ ${t.window_count===0?"<p>No command-active window: intent and tracking fail. This episode remains in the denominator.</p>":""}
+ <div class="table-scroll"><table><caption>Pooled means over all command windows</caption><thead><tr><th>Hand</th><th>Issued (N)</th><th>Measured (N)</th><th>Mean error (N)</th><th>Intent</th><th>Tracking \u2264 5 N</th></tr></thead><tbody>${a.map(([n,e])=>`<tr><th>${n}</th><td>${fmt(e.issued_mean_n)}</td><td>${fmt(e.measured_mean_n)}</td><td>${fmt(e.absolute_mean_error_n)}</td><td>${e.intent_pass?"Pass":"Fail"}</td><td>${e.tracking_pass?"Pass":"Fail"}</td></tr>`).join("")}</tbody></table></div>
+ <ul>${t.explanations.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>
+</details>`}

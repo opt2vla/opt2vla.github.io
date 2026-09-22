@@ -1,0 +1,19 @@
+task,level,signal,n_used,n_retained,mean_n,between_trial_sd_n,window
+boxpickup,gentle,VLA issued,5,5,6.9675171164990815,0.04108792095011217,contact_or_hold
+boxpickup,gentle,Measured,5,5,6.809901271338714,1.299057816740689,contact_or_hold
+boxpickup,firm,VLA issued,5,5,9.671033441385717,0.2748414748735753,contact_or_hold
+boxpickup,firm,Measured,5,5,10.380956815025055,1.502802253190526,contact_or_hold
+boxpickup,strong,VLA issued,5,5,15.457970032448248,0.44131283074935274,contact_or_hold
+boxpickup,strong,Measured,5,5,18.175520199424568,1.2329599785716776,contact_or_hold
+shelfboxinsertion,gentle,VLA issued,4,5,6.486986062753111,0.12791301295623447,contact_or_hold
+shelfboxinsertion,gentle,Measured,4,5,6.0908712523236535,1.5056607541550389,contact_or_hold
+shelfboxinsertion,firm,VLA issued,5,5,10.950852064383973,0.8726564040775362,contact_or_hold
+shelfboxinsertion,firm,Measured,5,5,7.657814274276913,1.2323742479431903,contact_or_hold
+shelfboxinsertion,strong,VLA issued,5,5,17.391603927551085,0.32184757790162605,contact_or_hold
+shelfboxinsertion,strong,Measured,5,5,13.33528655494718,2.292318243937902,contact_or_hold
+tablewiping,gentle,VLA issued,5,5,5.869723262802106,0.05519178718462403,contact_or_hold
+tablewiping,gentle,Measured,5,5,10.06241534384778,0.4695866960737436,contact_or_hold
+tablewiping,firm,VLA issued,5,5,11.046769914485143,0.6962699138796985,contact_or_hold
+tablewiping,firm,Measured,5,5,17.944209816224163,1.7954347405265314,contact_or_hold
+tablewiping,strong,VLA issued,5,5,15.63389277230496,1.1541590657917282,contact_or_hold
+tablewiping,strong,Measured,5,5,24.117353064037808,1.1678660898518782,contact_or_hold

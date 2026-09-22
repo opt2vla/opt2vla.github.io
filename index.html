@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>Opt2VLA: Force-Aware Vision-Language-Action for Contact-Rich Humanoid Whole-Body Manipulation</title>
+ <meta name="description" content="Opt2VLA enables humanoids to reason about both where to move and how strongly to interact. It jointly predicts motion and contact-force commands to perform contact-rich tasks involving the whole body.">
+ <link rel="canonical" href="https://opt2vla.github.io/">
+ <meta property="og:type" content="website">
+ <meta property="og:site_name" content="Opt2VLA">
+ <meta property="og:url" content="https://opt2vla.github.io/">
+ <meta property="og:title" content="Opt2VLA: Force-Aware Vision-Language-Action for Contact-Rich Humanoid Whole-Body Manipulation">
+ <meta property="og:description" content="Opt2VLA enables humanoids to reason about both where to move and how strongly to interact. It jointly predicts motion and contact-force commands to perform contact-rich tasks involving the whole body.">
+ <meta name="twitter:card" content="summary">
+ <meta name="twitter:title" content="Opt2VLA: Force-Aware Vision-Language-Action for Contact-Rich Humanoid Whole-Body Manipulation">
+ <meta name="twitter:description" content="Opt2VLA enables humanoids to reason about both where to move and how strongly to interact. It jointly predicts motion and contact-force commands to perform contact-rich tasks involving the whole body.">
+ <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%23272a24'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Georgia' font-size='25' fill='%23fff'%3EO%3C/text%3E%3C/svg%3E">
+ <link rel="stylesheet" href="./site.css">
+ <link rel="stylesheet" href="./player.css">
+ <link rel="stylesheet" href="./system.css">
+ <link rel="stylesheet" href="./flow.css">
+ <link rel="stylesheet" href="./cinematic.css">
+ <link rel="stylesheet" href="./results.css">
+ <link rel="stylesheet" href="./project-layout.css">
+ <link rel="stylesheet" href="./story.css">
+ <link rel="stylesheet" href="./force-story.css">
+ <link rel="stylesheet" href="./continuation.css">
+ <link rel="stylesheet" href="./publication.css">
+ <link rel="stylesheet" href="./hardware-examples.css">
+ <link rel="stylesheet" href="./evaluation-tracking.css">
+ <link rel="stylesheet" href="./method-overview.css">
+ <link rel="stylesheet" href="./data-collection.css">
+ <link rel="stylesheet" href="./network-view.css">
+ <link rel="stylesheet" href="./theme.css">
+ <script>try{if(JSON.parse(localStorage.getItem('opt2vla.appearance.v1'))?.theme==='day')document.documentElement.dataset.theme='day';}catch{}</script>
+ <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js"}}</script>
+</head>
+<body>
+ <div class="continuation-background" aria-hidden="true">
+  <picture><source data-portrait-final media="(max-aspect-ratio:1/1)"><img class="retained-final-scene" src="./assets/intro-study-title.webp" alt="" width="1920" height="1080"></picture>
+ </div>
+ <a class="skip-link" href="#overview">Skip to the project</a>
+ <header class="masthead"><a class="wordmark" href="#overview">Opt2VLA</a><nav aria-label="Quick access"><a href="#overview">Read the story</a></nav></header>
+ <section class="cinematic" id="cinematic" data-force-story aria-label="Opt2VLA: a story of motion and force">
+  <div class="story-stage">
+   <video id="hero-video" class="hero-video" muted playsinline preload="metadata" poster="./assets/force-story/tablewipe-gentle.jpg" aria-label="Gentle and strong C7 interactions followed by an illustrative Opt2VLA title animation" disablepictureinpicture controlslist="nodownload noremoteplayback">
+    <source src="./assets/force-story/force-story.mp4" type="video/mp4">
+   </video>
+   <canvas id="story-canvas" hidden aria-label="Scroll-controlled recorded interaction with outward issued and measured force arrows"></canvas>
+   <div class="hero-shade" aria-hidden="true"></div>
+   <div class="story-copy"><h2 id="story-title">A light touch</h2><p id="story-text">For a delicate surface. Gentle pressure.</p></div>
+   <aside class="story-readout" aria-label="Instruction and contact forces"><p class="readout-label">VLA instruction</p><p id="story-prompt">“Wipe the table with gentle pressure.”</p><div id="story-force-values"></div></aside>
+   <div class="story-bottom">
+    <div class="story-controls"><span>Scroll to explore</span><button id="hero-toggle" type="button" aria-controls="hero-video" hidden>Play film</button><a href="#overview">Read the project ↓</a></div>
+    <progress id="story-progress" max="1" value="0" aria-label="Film progress"></progress><nav id="story-chapters" aria-label="Force story chapters"></nav>
+    <p id="story-load-status" role="status"></p>
+   </div>
+  </div>
+ </section>
+ <div class="page-shell">
+ <aside class="section-nav" aria-label="Project navigation"><details id="page-contents" open><summary>Contents</summary><nav aria-label="Page sections">
+  <a href="#overview" aria-current="location">Overview</a>
+  <a href="#method">Motion-force interface</a>
+  <div class="nav-section"><a href="#force-controller">Force-aware controller</a><a class="demo-subsection" data-demo-link href="#controller">Live MuJoCo controller</a></div>
+  <a href="#data-generation">Data generation</a><a href="#planner">VLA architecture</a>
+  <div class="nav-section"><a href="#results">Evaluation</a><a class="demo-subsection" data-demo-link href="#demos-panel">Recorded playback</a></div>
+  <a href="#hardware">Hardware</a>
+  <a href="#takeaway">Takeaway</a>
+ </nav></details></aside>
+ <main>
+  <section id="overview" class="opening">
+   <header class="project-heading">
+   <h1><span class="project-name">Opt2VLA</span><span class="project-subtitle">Force-Aware Vision-Language-Action<br class="subtitle-break"> for Contact-Rich Humanoid Whole-Body Manipulation</span></h1>
+   <div class="project-authorship" aria-label="Authors and affiliation">
+    <ul class="project-authors">
+     <li><a href="https://fukangl.github.io/"><img src="./assets/authors/fukang.jpg" alt="" width="96" height="96" loading="lazy" decoding="async"><span>Fukang Liu<sup aria-label="equal contribution">*</sup></span></a></li>
+     <li><a href="https://peterchenyipu.github.io/"><span class="author-portrait author-portrait--yipu"><img src="./assets/authors/yipu.webp" alt="" width="96" height="96" loading="lazy" decoding="async"></span><span>Yipu Chen<sup aria-label="equal contribution">*</sup></span></a></li>
+     <li><a href="https://lab-idar.gatech.edu/jaehwi-jang/"><span class="author-portrait author-portrait--jaehwi"><img src="./assets/authors/jaehwi.png" alt="" width="96" height="96" loading="lazy" decoding="async"></span><span>Jaehwi Jang</span></a></li>
+     <li><a href="https://faculty.cc.gatech.edu/~danfei/"><img src="./assets/authors/danfei.jpg" alt="" width="96" height="96" loading="lazy" decoding="async"><span>Danfei Xu</span></a></li>
+     <li><a href="https://faculty.cc.gatech.edu/~zk15/"><img src="./assets/authors/zsolt.jpg" alt="" width="96" height="96" loading="lazy" decoding="async"><span>Zsolt Kira</span></a></li>
+     <li><a href="https://me.gatech.edu/faculty/zhao"><img src="./assets/authors/ye.png" alt="" width="96" height="96" loading="lazy" decoding="async"><span>Ye Zhao</span></a></li>
+    </ul>
+    <p class="project-affiliation">Georgia Institute of Technology</p>
+    <p class="project-contribution">* Equal contribution</p>
+   </div>
+   <nav class="publication-links" aria-label="Publication resources">
+    <a class="publication-link" href="https://arxiv.org/abs/2609.23968" title="Read Opt2VLA on arXiv"><img src="./vendor/lucide/file-text.svg" alt="" width="18" height="18">Paper</a>
+    <a class="publication-link" href="https://opt2vla.github.io/" title="Code forthcoming; opens the project website"><img src="./vendor/lucide/code-xml.svg" alt="" width="18" height="18">Code</a>
+    <a class="publication-link" href="#citation"><img src="./vendor/lucide/quote.svg" alt="" width="18" height="18">BibTeX</a>
+   </nav>
+   </header>
+   <section class="opening-film" id="opening-film" aria-labelledby="opening-film-heading">
+    <h2 id="opening-film-heading">Similar motions. Different forces.</h2>
+    <p>A robot's job is not just to move to the right place. It must also control how gently it grips or how firmly it presses. Opt2VLA turns those differences in language into motion and force commands, so people can specify how a task should be carried out.</p>
+    <div class="opening-film-links"><a class="opening-film-play" href="film.html"><img src="./vendor/lucide/play.svg" alt="" width="18" height="18">Watch the opening film</a><a href="film.html#rendering-notes">Rendering notes and credits</a></div>
+    <p id="illustration-context">An illustrated film built from recorded simulation rollouts.</p>
+   </section>
+   <div class="story-lead" id="project-summary"><p class="project-tldr"><strong>TL;DR</strong> Opt2VLA connects language instructions to <strong>both motion and contact force</strong>. A single multi-task VLA policy jointly predicts geometric motion goals and continuous force references, while task-specific whole-body controllers translate them into physical interaction.</p><p>Whole-body trajectory optimization provides physically grounded supervision for controller training. Controller rollouts then supply multimodal demonstrations for VLA fine-tuning, pairing observations with motion, force, and language targets. Evaluations in simulation and on humanoid hardware demonstrate language-conditioned force modulation during contact-rich manipulation.</p></div>
+   <details class="paper-abstract" id="paper-abstract"><summary>Abstract</summary>
+    <p>Humanoid robots are expected to perform diverse human-level tasks in daily environments, many of which require precise regulation of interaction forces. While recent vision-language-action (VLA) models have shown promise for semantic planning and visuomotor control, existing humanoid systems primarily represent actions through geometric motion goals and rely on whole-body controllers focused on motion tracking, with limited explicit reasoning or control of interaction forces. This limitation is particularly relevant in contact-rich tasks, where geometrically similar motions may require different force regimes depending on the task context and where visual observations may become unreliable after contact.</p>
+    <p>In this work, we present Opt2VLA, a force-aware VLA framework that introduces explicit force commands at the VLA-to-control interface for humanoid whole-body manipulation. A single multi-task VLA policy jointly predicts both geometric motion goals and continuous contact-force references, which are tracked by task-specific reinforcement learning (RL)-based whole-body controllers. To provide scalable and physically grounded supervision, we generate dynamically feasible and contact-consistent training data via whole-body trajectory optimization (TO) with explicit force references.</p>
+    <p>We evaluate Opt2VLA on three contact-rich humanoid tasks and show that explicit force conditioning enables more accurate and consistent force regulation than motion-only control, while physically grounded torque supervision from TO further improves force tracking accuracy and stability. Closed-loop evaluations further demonstrate language-conditioned force modulation with Opt2VLA in simulation and on humanoid hardware.</p>
+   </details>
+  </section>
+
+
+
+
+
+
+  <section class="article-section" id="method">
+   <aside><span>01 / APPROACH</span><p>The motion-force interface</p></aside>
+   <div class="prose"><h2>From language to motion and contact force.</h2><p>Geometric goals specify where to move, but similar motions can require different contact forces. Opt2VLA makes the desired contact force an <strong>explicit command alongside motion</strong>, so the policy can specify both the movement and the strength of the interaction.</p><p>A single VLA policy predicts 3D hand and foot position targets together with contact-force references from language, vision, kinematic state, and measured joint-torque history. Task-specific force-conditioned controllers with torque supervision (FCT) translate these predictions into coordinated whole-body action.</p></div>
+   <div class="method-overview" id="method-overview" data-paper-tabs>
+    <div class="paper-tabs method-tabs" role="tablist" aria-label="Opt2VLA framework">
+     <button type="button" role="tab" aria-selected="true" aria-controls="method-deployment" id="method-deployment-tab">Deployment</button>
+     <button type="button" role="tab" aria-selected="false" aria-controls="method-training" id="method-training-tab" tabindex="-1">Training</button>
+    </div>
+    <div id="method-deployment" role="tabpanel" aria-labelledby="method-deployment-tab" tabindex="0">
+     <figure class="method-figure" aria-label="Closed-loop deployment through an explicit motion-force interface">
+      <div class="method-inputs"><strong>VLA inputs</strong><span>Language instruction</span><span>Egocentric RGB</span><span>Kinematic state history</span><span>Measured joint-torque history</span></div>
+      <div class="method-input-arrow" aria-hidden="true">&darr;</div>
+      <ol class="method-pipeline method-runtime">
+       <li class="method-node method-policy"><span class="method-role">Predict</span><h3>Force-aware VLA</h3><p>One policy across box pickup, shelf-box pushing, and surface wiping.</p><p>Jointly predicts motion and force sequences.</p><span class="method-arrow" aria-hidden="true">&rarr;</span></li>
+       <li class="method-node method-interface"><span class="method-role">Explicit interface</span><h3>Motion + force</h3><dl class="method-commands"><div><dt>3D position targets</dt><dd>Left and right hands and feet</dd></div><div><dt>Contact-force references</dt><dd>Desired hand contact forces</dd></div></dl><span class="method-arrow" aria-hidden="true">&rarr;</span></li>
+       <li class="method-node method-controller"><span class="method-role">Track</span><h3>FCT controller</h3><p>Task-specific whole-body policy.</p><p>Tracks motion and regulates contact force.</p><p class="method-output">Joint-position commands</p><span class="method-arrow" aria-hidden="true">&rarr;</span></li>
+       <li class="method-node method-execution"><span class="method-role">Execute</span><h3>Robot + PD loop</h3><img src="./assets/cinematic/tablewipe-presentation-1080p.webp" width="1920" height="1080" loading="lazy" alt="Blender rendering of Digit wiping a table, reconstructed from a recorded simulation rollout."><p>Physical interaction with the environment.</p></li>
+      </ol>
+      <div class="method-feedback" aria-label="Robot observations feed back to the VLA and controller">
+       <svg viewBox="0 0 1000 176" preserveAspectRatio="none" aria-hidden="true"><defs><marker id="method-feedback-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M 0 0 L 8 4 L 0 8 Z" fill="currentColor"></path></marker></defs><path class="method-return-path" d="M 884 0 V 86 H 628 V 5" marker-end="url(#method-feedback-arrow)"></path><path class="method-return-path" d="M 884 0 V 166 H 116 V 5" marker-end="url(#method-feedback-arrow)"></path></svg>
+       <p class="method-feedback-controller">Robot &rarr; FCT<br>Kinematic state + measured joint torque</p>
+       <p class="method-feedback-vla">Robot &rarr; VLA<br>RGB + kinematic state + measured joint-torque history</p>
+      </div>
+      <figcaption>The VLA specifies end-effector motion and contact-force targets; FCT realizes these commands through whole-body control with robot feedback.</figcaption>
+     </figure>
+    </div>
+    <div id="method-training" role="tabpanel" aria-labelledby="method-training-tab" tabindex="0" hidden>
+     <figure class="method-figure" aria-label="Offline supervision and data collection for Opt2VLA training">
+      <div class="method-inputs"><strong>Task specification</strong><span>Robot + scene</span><span>Motion goals</span><span>Contact schedule</span><span>Prescribed contact wrench</span></div>
+      <div class="method-input-arrow" aria-hidden="true">&darr;</div>
+      <ol class="method-pipeline method-training-pipeline">
+       <li class="method-node"><span class="method-role">Offline optimization</span><h3>Whole-body TO</h3><p>Enforces dynamics, contact constraints, and actuator limits under a prescribed contact schedule.</p><p class="method-output">Motion references + optimized joint torques</p><span class="method-arrow" aria-hidden="true">&rarr;</span></li>
+       <li class="method-node"><span class="method-role">Controller learning</span><h3>FCT training</h3><p>Tracks motion and prescribed force commands.</p><p class="method-training-only">TO joint torques: privileged training supervision</p><span class="method-arrow" aria-hidden="true">&rarr;</span></li>
+       <li class="method-node"><span class="method-role">Data collection</span><h3>Controller rollouts</h3><p>Simulation and hardware executions record RGB, kinematic state, and measured joint torque.</p><p class="method-output">Observations + language paired with commanded end-effector and force targets</p><span class="method-arrow" aria-hidden="true">&rarr;</span></li>
+       <li class="method-node"><span class="method-role">VLA policy learning</span><h3>VLA fine-tuning</h3><p>Fine-tunes a pretrained VLA on multimodal demonstrations.</p><p class="method-output">Joint prediction of 3D end-effector positions and contact-force targets</p></li>
+      </ol>
+      <figcaption>TO generates motion and joint-torque references under prescribed contact wrenches and a specified contact schedule. VLA supervision pairs observations and instructions with commanded 3D end-effector positions and contact-force targets.</figcaption>
+     </figure>
+    </div>
+   </div>
+  </section>
+  <section class="article-section" id="force-controller">
+   <aside><span>02 / FCT</span><p>Low-level control</p></aside>
+   <div class="prose"><h2>Next, learn to turn a force command into contact.</h2><p>The low-level controller has the physical job: keep the humanoid coordinated while tracking position and force targets. We compare motion-only control, force conditioning, and force conditioning with optimized torque supervision—FCT.</p><p>The important comparison is FC versus FCT: both receive force commands, but FCT also learns from the optimizer’s torque references during training. The errors below measure how closely each controller realizes the requested force.</p></div>
+   <div class="wide">
+    <ol class="controller-variants">
+     <li><strong>MO — motion only.</strong> Geometric motion tracking, without a force command or force-tracking objective.</li>
+     <li><strong>FC — force conditioned.</strong> Adds the target contact force and a force-tracking objective.</li>
+     <li><strong>FCT — force conditioned with torque supervision.</strong> Adds TO-derived joint-torque supervision during training.</li>
+    </ol>
+    <div class="table-scroll controller-results" role="region" aria-labelledby="controller-results-caption" tabindex="0">
+     <table class="controller-error-table" aria-describedby="controller-results-note">
+      <caption id="controller-results-caption">Simulation force-tracking error <span>MAE ± std (N) · lower is better</span></caption>
+      <thead><tr><th scope="col">Task</th><th scope="col">Controller</th><th scope="col">5 N</th><th scope="col">10 N</th><th scope="col">15 N</th><th scope="col">20 N</th><th scope="col">Avg.</th></tr></thead>
+      <tbody>
+       <tr><th scope="rowgroup" rowspan="2">Surface wiping</th><th scope="row">FC</th><td>3.1 ± 2.4</td><td>2.6 ± 2.5</td><td>2.5 ± 1.9</td><td>1.5 ± 1.8</td><td>2.4 ± 2.9</td></tr>
+       <tr class="fct-row"><th scope="row">FCT</th><td>2.6 ± 2.6</td><td>1.7 ± 2.1</td><td>1.3 ± 1.5</td><td>1.0 ± 1.2</td><td>1.7 ± 2.1</td></tr>
+      </tbody>
+      <tbody>
+       <tr><th scope="rowgroup" rowspan="2">Shelf-box pushing</th><th scope="row">FC</th><td>4.7 ± 0.6</td><td>9.2 ± 1.1</td><td>13.7 ± 1.1</td><td>17.1 ± 1.4</td><td>11.2 ± 4.8</td></tr>
+       <tr class="fct-row"><th scope="row">FCT</th><td>3.9 ± 1.2</td><td>3.5 ± 3.4</td><td>2.5 ± 3.5</td><td>7.0 ± 6.7</td><td>4.2 ± 5.5</td></tr>
+      </tbody>
+      <tbody>
+       <tr><th scope="rowgroup" rowspan="2">Box pickup</th><th scope="row">FC</th><td>1.0 ± 1.2</td><td>1.6 ± 0.9</td><td>2.5 ± 0.6</td><td>3.5 ± 0.6</td><td>2.3 ± 1.4</td></tr>
+       <tr class="fct-row"><th scope="row">FCT</th><td>0.7 ± 0.5</td><td>0.5 ± 0.5</td><td>0.6 ± 0.7</td><td>1.6 ± 1.1</td><td>0.9 ± 1.0</td></tr>
+      </tbody>
+     </table>
+    </div>
+   </div>
+   <div class="prose controller-findings"><p id="controller-results-note">FCT achieves lower force-tracking MAE than FC at every reported force level. Its average error falls from 2.4 to 1.7 N for surface wiping, from 11.2 to 4.2 N for shelf-box pushing, and from 2.3 to 0.9 N for box pickup. Physically, a force target specifies the desired interaction, but not how the joints should coordinate their effort to realize it. TO computes torque references alongside feasible motion under prescribed contact wrenches, accounting for whole-body dynamics, contact constraints, and actuator limits. FCT uses these references as additional training guidance beyond the force-tracking reward shared with FC. The reduced errors are consistent with torque supervision helping the controller learn how to produce the requested force while coordinating the whole body.</p></div>
+  <details class="controller-demo" id="controller" open><summary>Live MuJoCo controller</summary>
+   <div class="prose"><p>The low-level FCT controller runs live in your browser, following a predefined trajectory-optimization (TO) motion reference. Force targets follow TO unless force adjustment is enabled, which supplies an online command within the same contact schedule. Apply push or drag disturbances, or change box mass for pickup and table height for wiping on reset. These physical changes leave the motion reference unchanged.</p><p class="caption">Experimental browser port, separate from the reported MJX evaluations. One scene at a time; approximately 60 MB initial download. Desktop recommended.</p><div class="controller-launch"><label>Task <select id="controller-task"><option value="tablewipe">Surface wiping</option><option value="boxpickup">Box pickup</option><option value="shelfbox">Shelf-box pushing</option></select></label><button id="controller-load">Load live controller</button></div><p class="development-note" id="controller-status">Loads only when requested.</p></div>
+   <div id="controller-preview" class="controller-preview">
+    <img id="controller-preview-image" src="./assets/controller/previews/tablewipe.webp" width="1280" height="720" loading="lazy" decoding="async" alt="Surface wiping: initial Digit robot and table in the live MuJoCo controller scene.">
+    <button id="controller-preview-start" type="button" aria-controls="live-controller"><img src="./vendor/lucide/play.svg" width="20" height="20" alt="">Start live controller</button>
+   </div>
+   <div class="wide" id="live-controller" hidden>
+    <div class="controller-visual" id="controller-visual">
+    <div id="controller-canvas"></div>
+    <p class="caption controller-interaction-note">Drag inside the 3D view to orbit the camera; scroll to zoom. Hold Shift while dragging the robot or box to apply a bounded force (up to 35 N). Push buttons apply 20 N for 0.25 s. Off-screen simulation pauses automatically.</p>
+    </div>
+    <div class="controller-sidebar" id="controller-sidebar">
+    <div id="controller-controls" hidden>
+     <button id="controller-play">Play</button><button id="controller-reset">Reset</button><span id="controller-time">0.00 s</span>
+     <button id="controller-drag" type="button" aria-label="Drag disturbance" aria-pressed="false" aria-controls="controller-canvas" title="Drag disturbance: while running, drag the robot or box to apply up to 35 N. Toggle off to orbit. Escape cancels."><img src="./vendor/lucide/hand.svg" alt="" width="18" height="18">Drag</button>
+     <button data-nudge="-1">Push left</button><button data-nudge="1">Push right</button><button id="controller-stop" title="Stop simulation and release memory">Stop</button>
+    </div>
+    <details id="controller-physics" class="controller-physics" hidden><summary>Initial scene</summary>
+     <div class="controller-force-value"><label id="controller-physics-label" for="controller-physics-slider">Box mass</label><output id="controller-physics-value" for="controller-physics-slider"></output></div>
+     <input id="controller-physics-slider" type="range" aria-labelledby="controller-physics-label" aria-describedby="controller-physics-note" disabled>
+     <p id="controller-physics-note" class="caption">Applies only with Apply &amp; reset, not during playback.</p>
+     <button type="button" id="controller-physics-apply" disabled title="Apply to a fresh episode with the default force setting"><img src="./vendor/lucide/rotate-ccw.svg" width="16" height="16" alt="">Apply &amp; reset</button>
+    </details>
+    <div class="controller-data"><div>
+     <div class="controller-force-control">
+      <div class="controller-force-heading"><label title="Change force within the original TO contact schedule. Changes are limited to 10 N/s. Uncheck to return to the TO force."><input id="controller-force-enable" type="checkbox" disabled> Adjust force</label><span id="controller-force-phase">TO reference</span></div>
+      <div class="controller-force-value"><label id="controller-force-label" for="controller-force">Right hand (N)</label><output id="controller-force-value" for="controller-force">10.0 N</output></div>
+      <input id="controller-force" type="range" min="5" max="20" step="0.5" value="10" disabled aria-labelledby="controller-force-label" title="Force is zero outside scheduled contact. Preselect a value or change it while running.">
+     </div>
+     <label>Force channel <select id="controller-hand"><option value="1">Right hand</option><option value="0">Left hand</option></select></label><p id="controller-readout"></p><p class="controller-legend"><span class="legend-command">Commanded</span><span class="legend-measured">Measured</span></p><p class="caption">Measured force is the simulated normal force summed over hand–task-object contacts.</p></div><svg id="controller-plot" viewBox="0 0 560 190" role="img" aria-label="Applied command and measured normal force"></svg></div>
+    </div>
+   </div>
+  </details>
+  </section>
+  <section class="article-section" id="data-generation">
+   <aside><span>03 / DATA</span><p>Learning from execution</p></aside>
+   <div class="prose"><h2>Generate structured motion–force data at scale.</h2><p>Learning contact-rich manipulation requires supervision that aligns <strong>motion goals and desired contact forces</strong> with visual observations, robot feedback, and language. Collecting diverse, consistently force-labeled data for humanoids is non-trivial: demonstrations must capture physical interaction while maintaining balance and coordinating whole-body motion.</p><p>Opt2VLA combines whole-body trajectory optimization with trained FCT controllers to generate these demonstrations. TO provides motion references under prescribed contact forces; controller rollouts record how the robot actually executes them. Varying force levels, task configurations, object properties, and scene appearance expands the simulation data, complemented by a smaller set of hardware executions. Motion and force labels come from the issued commands; RGB, kinematic state, and measured joint torque come from the resulting execution.</p></div>
+   <div class="wide collection-section">
+    <dl class="collection-variation" aria-label="Dimensions of simulation data variation"><div><dt>Force levels</dt><dd>Continuous contact-force targets</dd></div><div><dt>Task configurations</dt><dd>Motion goals and object poses</dd></div><div><dt>Object properties</dt><dd>Task-specific physical variation</dd></div><div><dt>Scene appearance</dt><dd>Object and environment colors</dd></div></dl>
+    <figure class="collection-figure" id="collection-figure" aria-labelledby="collection-heading">
+     <div class="collection-topline"><h3 id="collection-heading">From a force-specified trajectory to a training example</h3><div class="collection-transport" hidden><button type="button" id="collection-play" aria-label="Play collection example" title="Play collection example"><img src="./vendor/lucide/play.svg" width="18" height="18" alt=""></button><label class="sr-only" for="collection-time">Example time</label><input id="collection-time" type="range" min="0" max="7.02" step="0.02" value="3.5"><output id="collection-clock" for="collection-time">3.50 s</output></div></div>
+     <div class="collection-pipeline">
+      <section class="collection-step collection-reference" aria-labelledby="collection-reference-heading">
+       <span class="collection-stage">01 / SPECIFY &amp; OPTIMIZE</span><h4 id="collection-reference-heading">Motion + force references</h4>
+       <div class="collection-reference-visual"><div class="collection-pose-labels"><span>Approach<small>1.0 s</small></span><span>Contact<small>3.5 s</small></span><span>Wipe<small>5.8 s</small></span></div>
+       <img class="collection-poses" src="./assets/collection/reference-poses.svg" width="420" height="195" loading="lazy" alt="Vector projection of three optimized Digit poses: approaching the table, establishing downward contact, and wiping along the surface."></div>
+       <div class="collection-motion-signals">
+        <label class="collection-effector-label" for="collection-effector">3D position targets (m)<select id="collection-effector" disabled><option value="left_hand">Left hand</option><option value="right_hand" selected>Right hand</option><option value="left_foot">Left foot</option><option value="right_foot">Right foot</option></select></label>
+        <div class="collection-series-key" aria-label="Position axes"><span class="signal-x">X</span><span class="signal-y">Y</span><span class="signal-z">Z</span></div>
+        <div class="collection-chart" data-collection-chart="position"><svg role="img" aria-label="Recorded right-hand XYZ position targets versus time"></svg></div>
+        <p class="collection-signal-note">Four end-effectors: both hands and both feet.<br>Base-relative positions, local axes.</p>
+       </div>
+       <div class="collection-force-signals">
+        <div class="collection-chart" data-collection-chart="force"><span>Hand-force targets (N)</span><svg role="img" aria-label="Recorded left- and right-hand force commands versus time"></svg></div>
+        <div class="collection-series-key"><span class="signal-force-left">Left hand</span><span class="signal-force-right">Right hand</span></div>
+       </div>
+       <p class="collection-step-note">Whole-body dynamics + contact constraints.<br>Motion and force share one contact schedule.</p>
+      </section>
+      <section class="collection-step collection-execution" aria-labelledby="collection-execution-heading">
+       <span class="collection-stage">02 / EXECUTE &amp; RECORD</span><h4 id="collection-execution-heading">FCT controller rollouts</h4>
+       <div class="collection-control-loop" aria-label="Reference targets drive FCT; joint-position commands drive the robot; robot state feeds back to FCT"><span>Motion + force targets</span><div><b>FCT</b><span aria-hidden="true">&rarr;</span><b>PD + robot</b></div><small>Joint-position commands &rarr;<br>&larr; Kinematics + joint-torque feedback</small></div>
+       <figure class="collection-rgb"><video id="collection-video" width="320" height="240" muted playsinline preload="none" poster="./assets/collection/chest-rgb.webp" aria-label="Recorded chest-camera view from the same wiping training episode"><source src="./assets/collection/chest-rgb.mp4" type="video/mp4"></video><figcaption>Recorded egocentric RGB</figcaption></figure>
+       <div class="collection-torque-signals">
+        <p class="collection-signal-heading">Measured upper-body joint torques (Nm)</p>
+        <div class="collection-series-key collection-joint-key" aria-label="Joints per arm"><span class="signal-x">Shoulder roll</span><span class="signal-y">Shoulder pitch</span><span class="signal-z">Shoulder yaw</span><span class="signal-elbow">Elbow</span></div>
+        <div class="collection-chart" data-collection-chart="torque_left"><span>Left arm</span><svg role="img" aria-label="All four measured left-arm joint torques versus time"></svg></div>
+        <div class="collection-chart" data-collection-chart="torque_right"><span>Right arm</span><svg role="img" aria-label="All four measured right-arm joint torques versus time"></svg></div>
+       </div>
+       <p class="collection-step-note">Observations retain the robot’s actual response, including tracking imperfections.</p>
+      </section>
+      <section class="collection-step collection-pairing" aria-labelledby="collection-pairing-heading">
+       <span class="collection-stage">03 / PAIR &amp; ANNOTATE</span><h4 id="collection-pairing-heading">A multimodal demonstration</h4>
+       <blockquote>“Wipe the table with <em>firm</em> pressure.”</blockquote>
+       <div class="collection-sequence">
+        <table><caption>Aligned sequence <small>50 Hz · common time base</small></caption>
+         <thead><tr><th scope="col">Stream</th><th scope="col">t<sub>0</sub></th><th scope="col">t<sub>1</sub></th><th scope="col">&hellip;</th><th scope="col">t<sub>T</sub></th></tr></thead>
+         <tbody>
+          <tr class="collection-sequence-group"><th colspan="5" scope="rowgroup">Observations</th></tr>
+          <tr><th scope="row">Chest RGB</th><td>I<sub>0</sub></td><td>I<sub>1</sub></td><td>&hellip;</td><td>I<sub>T</sub></td></tr>
+          <tr><th scope="row">Kinematic state</th><td>s<sub>0</sub></td><td>s<sub>1</sub></td><td>&hellip;</td><td>s<sub>T</sub></td></tr>
+          <tr><th scope="row">Measured torques</th><td>τ<sub>0</sub></td><td>τ<sub>1</sub></td><td>&hellip;</td><td>τ<sub>T</sub></td></tr>
+         </tbody>
+         <tbody class="collection-command-sequence">
+          <tr class="collection-sequence-group"><th colspan="5" scope="rowgroup">Command labels</th></tr>
+          <tr><th scope="row">3D EE targets</th><td>p<sub>0</sub></td><td>p<sub>1</sub></td><td>&hellip;</td><td>p<sub>T</sub></td></tr>
+          <tr><th scope="row">Hand-force targets</th><td>f<sub>0</sub></td><td>f<sub>1</sub></td><td>&hellip;</td><td>f<sub>T</sub></td></tr>
+         </tbody>
+        </table>
+        <p class="collection-schema">Each column is one synchronized timestep. Symbols denote full vectors or images, not individual scalar values: p contains four XYZ targets; f contains two hand-force targets; τ contains eight joint torques.</p>
+       </div>
+       <div class="collection-training-destination"><span aria-hidden="true">&darr;</span><strong>VLA fine-tuning</strong><span>Pair observation histories and language with future motion–force commands.</span></div>
+      </section>
+     </div>
+     <figcaption>One simulation training episode. Poses are vector projections of the TO reference; curves and RGB come from its controller rollout. Motion and force labels are the issued targets.</figcaption>
+     <p id="collection-status" role="status" hidden></p>
+     <noscript><p>The reference poses, camera image, and sequence structure are shown here. Recorded signal curves require JavaScript.</p></noscript>
+    </figure>
+    <p class="collection-takeaway">The key is <strong>explicit, time-aligned motion–force supervision</strong>: the desired interaction is specified before execution, while the learner observes how the robot actually realizes it. Additional task configurations and controller rollouts can extend the dataset while preserving the same structured labels.</p>
+   </div>
+  </section>
+  <section class="article-section" id="planner">
+   <aside><span>04 / PLANNER</span><p>Architecture and ablations</p></aside>
+   <div class="prose"><h2>Finally, let language specify the task and its force.</h2><p>A geometric path specifies where to move, but not uniquely how strongly to interact. Similar motions can require different contact forces depending on the instruction and task context. Opt2VLA makes <strong>motion and contact force joint prediction targets</strong>: one VLA policy predicts temporally aligned 3D end-effector targets and hand-force commands from language and multimodal observations. This gives language a direct route to specifying the desired interaction, while FCT handles its joint-level realization and whole-body coordination.</p><p>To ground these predictions in <strong>physical interaction feedback</strong>, the policy uses measured joint-torque histories alongside vision and kinematic state. Torque histories provide complementary evidence of loading and how the interaction evolves over time. In our C7 model, separate encoders give kinematic history and torque feedback dedicated inputs to the action model. An auxiliary future-torque prediction objective encourages the model to anticipate the robot’s physical response. The controller interface remains motion and force commands; closed-loop ablations test how these design choices affect task completion, agreement with the requested force level, and force tracking.</p></div>
+   <div class="wide" id="architecture-comparison">
+    <div class="architecture-topline"><h3>Architecture and simulation joint SR</h3></div>
+    <div class="architecture-pair">
+     <article class="architecture-slot" data-architecture-slot="right"><label>Model variant<select aria-label="Model variant"></select></label><p class="architecture-detail"></p><div class="architecture-scores" aria-label="Model simulation joint success rates"></div><div id="network-model-right" data-network-model aria-label="Architecture diagram"></div></article>
+    </div>
+    <details class="architecture-notes"><summary>Token shapes and training details</summary>
+    <p class="caption"><strong>Observation encoding.</strong> Each kinematic sample contains 46 values: base linear/angular velocities and 20 joint positions/velocities. C0–C3 use the current observation; C2/C3 append eight current arm-joint torques. C4–C7 and C8 use ten samples at 200-ms spacing, spanning 1.8 s. C4/C5 concatenate torque with state before padding and flattening the history into one state token. C6/C7/C8 separately encode kinematic history and the 10 × 8 torque history into one token each. History length is not token count.</p>
+    <p class="caption"><strong>Tokens and controller outputs.</strong> H is the predicted action horizon, distinct from observation history. The DiT input contains H action tokens plus one state token, or H + 2 tokens with dedicated torque conditioning. Dₛ and Dₐ are padded state/action widths; d and dₒ denote input-token and DiT output-feature widths. Only the H action positions feed the shared readout. After N flow-matching updates and unnormalization, the joint chunk supplies <strong>H × 12 motion targets</strong> (XYZ for both hands and feet) and <strong>H × 2 contact-force targets</strong> (one scalar per hand). Separate output blocks do not imply separate decoders.</p>
+    <p class="caption"><strong>Auxiliary future torque.</strong> C1/C3/C5/C7/C8 reserve the last eight channels of each padded action row for future measured arm-joint torque. Motion, force, and these auxiliary channels are jointly noised, encoded, and denoised; the auxiliary loss is masked and weighted separately. At inference, future torque is generated from noise, not supplied as an observation or sent as a robot command. Orange identifies observed torque; magenta identifies auxiliary future torque, not additional tokens or a fixed latent-channel partition.</p>
+    <p class="caption"><strong>Training and inference.</strong> The VL connector includes feature normalization and self-attention before cross-attention conditioning. T-H trains this connector, input/output projectors, and the action model while freezing the language and vision backbones; C8 also fine-tunes those backbones. Each inference call holds observations fixed while re-encoding the updated chunk for N iterations. The inspected C7 export uses H = 40, N = 4, Dₛ = Dₐ = 132, d = 1536, dₒ = 1024, and auxiliary-loss weight 0.1. These are checkpoint settings, not fixed architectural requirements. Tensor grids abbreviate dimensions; model volumes are not parameter-count scales.</p>
+    </details>
+    <p class="caption">Rates are the paper’s joint success rates: 30 episodes per task, 90 overall. C0 (GR00T) is the Digit-adapted motion–force baseline.</p>
+   </div>
+  </section>
+  <section class="article-section" id="results">
+   <aside><span>06 / RESULTS</span><p>Closed-loop evaluation</p></aside>
+   <div class="prose"><h2>Beyond task completion: language-specified force in action.</h2><p>Completing a manipulation task does not establish that the robot used the requested force. A successful pickup or wipe can still apply too little or too much force for the instruction. We evaluate the <strong>full language-to-contact loop</strong>: task completion, agreement between VLA-issued commands and the requested force regime, and agreement between commanded and realized forces. Joint success requires all three gates to pass. The force gates include all command-active windows, not only a successful attempt.</p><p>To test how interaction feedback supports this capability, we compare nine VLA configurations that <strong>all predict motion and contact force</strong> and share the same task-specific FCT controllers. Scenes, prompts, and inference settings are held fixed while we vary torque encoding, observation history, auxiliary future-torque supervision, and backbone fine-tuning. Each variant runs 90 simulation episodes across three tasks and three force levels. This controlled comparison tests whether representing and predicting physical feedback improves language-conditioned execution, beyond geometric task completion alone.</p><p><a class="inline-demo-link" href="#demos-panel">Recorded playback</a></p></div>
+   <div class="wide">
+    <p class="caption" id="evaluation-status" role="status">Loading evaluation records…</p>
+    <div class="page-tabs" role="tablist" data-page-tabs aria-label="Evaluation"><button id="results-tab" role="tab" aria-selected="true" aria-controls="results-summary">Results</button><button id="tracking-tab" role="tab" aria-selected="false" aria-controls="tracking-summary" tabindex="-1">Force tracking</button><button id="episodes-tab" role="tab" aria-selected="false" aria-controls="recordings" tabindex="-1">Explore episodes</button></div>
+    <div id="results-summary" role="tabpanel" aria-labelledby="results-tab" tabindex="0">
+    <div class="page-tabs compact-tabs" role="tablist" data-page-tabs aria-label="Result views"><button id="success-tab" role="tab" aria-selected="true" aria-controls="success-summary">Success rates</button><button id="prompt-tab" role="tab" aria-selected="false" aria-controls="prompt-summary" tabindex="-1">Task &amp; prompt breakdown</button><button id="c7-tracking-tab" role="tab" aria-selected="false" aria-controls="c7-tracking-summary" tabindex="-1">C7 tracking</button></div>
+    <div id="success-summary" role="tabpanel" aria-labelledby="success-tab" tabindex="0">
+    <div class="table-scroll"><table class="evaluation-table"><caption>Success rate (%) · cumulative gates</caption>
+     <thead><tr><th rowspan="2" scope="col">Configuration</th><th colspan="3" scope="colgroup">Box pickup</th><th colspan="3" scope="colgroup">Shelf push</th><th colspan="3" scope="colgroup">Wiping</th><th colspan="3" scope="colgroup">Overall</th></tr>
+      <tr><th scope="col">Task</th><th scope="col">+ Intent</th><th scope="col">Joint</th><th scope="col">Task</th><th scope="col">+ Intent</th><th scope="col">Joint</th><th scope="col">Task</th><th scope="col">+ Intent</th><th scope="col">Joint</th><th scope="col">Task</th><th scope="col">+ Intent</th><th scope="col">Joint</th></tr></thead><tbody id="result-rows"></tbody>
+    </table></div>
+    <p class="caption">Task → task + force intent → task + force intent + tracking. Counts appear below each percentage. Thirty episodes per task, 90 overall; underlines mark column-best results, including ties.</p>
+    <p class="result-text">Opt2VLA achieves 82.2% overall joint success, the highest rate in this comparison. It ties with C8 on pickup, with C6 on shelf pushing, and with C6 and C8 on wiping.</p>
+    <details class="evaluation-protocol" id="scoring"><summary>What each gate measures</summary>
+     <ol><li><strong>Task.</strong> Pickup: the box clears the table by 5 cm. Shelf push: the box reaches the right wall. Wiping: at least one 5 cm stroke within 30° of the instructed direction.</li>
+      <li><strong>Force intent.</strong> The pooled issued mean over all command-active windows falls in the prompt band. Both hands pass independently for pickup; the right hand is checked for shelf pushing and wiping.</li>
+      <li><strong>Tracking.</strong> The absolute difference between pooled issued and measured means is at most 5 N for each required hand, using that same union of windows.</li></ol>
+     <p>A command window begins after the maximum issued force across required hands exceeds 0.5 N for 0.1 s and ends after it stays at or below 0.5 N for 0.2 s. Confirmed boundaries are backdated. All controller samples within these windows are pooled, including contact loss and unsuccessful attempts; gaps are excluded. Windows still active at termination are retained. One command-associated task completion is sufficient for the task gate. No command window means force-gate failure. All 810 episodes remain in the denominator.</p>
+     <table><caption>Force-intent bands</caption><thead><tr><th>Gentle</th><th>Firm</th><th>Strong</th></tr></thead><tbody><tr><td>[0, 9] N</td><td>(5, 16] N</td><td>(12, 22] N</td></tr></tbody></table>
+    </details>
+    </div>
+    <div id="prompt-summary" role="tabpanel" aria-labelledby="prompt-tab" tabindex="0" hidden>
+     <h3>Results for all nine task–instruction combinations</h3>
+     <div class="evaluation-controls"><label>Configuration<select id="prompt-checkpoint"></select></label></div>
+     <div class="table-scroll"><table><caption>Per-instruction success rate (%)</caption><thead><tr><th>Task</th><th>Instruction</th><th>Task</th><th>Task + intent</th><th>Joint</th></tr></thead><tbody id="prompt-rows"></tbody></table></div>
+    </div>
+    <div id="c7-tracking-summary" role="tabpanel" aria-labelledby="c7-tracking-tab" tabindex="0" hidden>
+     <h3>C7 force and end-effector tracking</h3>
+     <figure class="c7-tracking-figure"><div class="hardware-aggregate-key"><span><i class="summary-key-command"></i>VLA command</span><span><i class="summary-key-measured"></i>Measured</span></div><div id="c7-tracking-charts"><p class="c7-load-status" role="status">Loading tracking statistics...</p></div><figcaption>Mean and sample standard deviation across ten scenes per prompt, using each episode's command-window union. Pickup hands are reported separately.</figcaption></figure>
+    </div>
+    </div>
+    <div id="tracking-summary" role="tabpanel" aria-labelledby="tracking-tab" tabindex="0" hidden>
+     <div class="table-scroll"><table class="evaluation-table"><caption>Force tracking error (N)</caption>
+      <thead><tr><th rowspan="2" scope="col">Configuration</th><th colspan="3" scope="colgroup">Box pickup</th><th colspan="3" scope="colgroup">Shelf pushing</th><th colspan="3" scope="colgroup">Surface wiping</th><th colspan="3" scope="colgroup">Overall</th></tr>
+       <tr><th scope="col">MAE</th><th scope="col">Mean</th><th scope="col">n</th><th scope="col">MAE</th><th scope="col">Mean</th><th scope="col">n</th><th scope="col">MAE</th><th scope="col">Mean</th><th scope="col">n</th><th scope="col">MAE</th><th scope="col">Mean</th><th scope="col">n</th></tr></thead><tbody id="tracking-rows"></tbody>
+     </table></div>
+     <p class="caption">MAE pools absolute errors over timesteps. Mean averages per-episode mean-force errors. n counts episodes with command windows. Underlines mark the lowest errors.</p>
+     <p class="result-text">These errors describe tracking when force is commanded, including unsuccessful trials. Coverage differs, so they complement success rates rather than rank policy performance alone.</p>
+     <details class="evaluation-protocol"><summary>Force error definitions</summary><p>Both metrics use the original full-recording command-window union. Pickup averages hand-wise absolute errors; shelf pushing and wiping use the right hand. Overall equally weights tasks. Episodes without command windows have undefined error, not zero error, and remain failures in success rates.</p></details>
+    </div>
+    <div id="recordings" role="tabpanel" aria-labelledby="episodes-tab" tabindex="0" hidden>
+     <div class="page-tabs compact-tabs" role="tablist" data-page-tabs aria-label="Episode selection"><button id="demos-tab" role="tab" aria-selected="true" aria-controls="demos-panel">C7 demonstrations</button><button id="outcomes-tab" role="tab" aria-selected="false" aria-controls="outcomes-panel" tabindex="-1">Outcome breakdown</button></div>
+     <div id="outcomes-panel" role="tabpanel" aria-labelledby="outcomes-tab" tabindex="0" hidden>
+      <h3>Where episodes fall short</h3>
+      <div class="evaluation-controls"><label>Configuration<select id="breakdown-checkpoint"></select></label><label>Task<select id="breakdown-task"><option value="boxpickup">Box pickup</option><option value="shelfbox">Shelf push</option><option value="tablewipe">Wiping</option></select></label></div>
+      <p class="caption" id="breakdown-summary" role="status"></p><div id="gate-sankey"></div>
+      <p class="caption">Select a failure branch or joint success to inspect one episode. Each failure is assigned to its first unmet gate; zero-count groups have no example.</p>
+      <div class="evaluation-controls"><label>All episodes for this configuration and task<select id="all-episode-select"><option>Loading…</option></select></label></div>
+      <p class="caption">The breakdown uses task → intent → tracking order. Episode details show all independent gate failures; these are not causal diagnoses of the VLA or controller.</p>
+     </div>
+     <div id="demos-panel" role="tabpanel" aria-labelledby="demos-tab" tabindex="0">
+      <h3>Recorded playback · C7 interactions</h3>
+      <p class="caption episode-intro">One successful C7 episode per task and force instruction, selected from the evaluation above. Shelf examples share reference scene 08 and each has one naturally closed command window. Full recordings remain available in the outcome browser.</p>
+      <div id="example-list"></div>
+     </div>
+     <div id="outcome-viewer" hidden></div>
+     <p id="representative-status" class="caption" role="status">Loading outcome examples…</p>
+    </div>
+   </div>
+  </section>
+  <section class="article-section" id="hardware">
+   <aside><span>07 / HARDWARE</span><p>Physical interaction</p></aside>
+   <div class="prose"><h2>Language-specified force on the physical robot.</h2><p>Similar motions can produce very different physical interactions. Opt2VLA makes the requested force level part of the action: it jointly commands motion and contact force, while FCT turns those commands into whole-body execution.</p><p>We test both FCT's low-level force regulation and the full vision-language-action loop on Digit. The same VLA checkpoint executes box pickup, shelf-box pushing, and surface wiping under gentle, firm, and strong instructions.</p></div>
+   <div class="hardware-examples" id="hardware-execution">
+    <div class="page-tabs hardware-tabs" role="tablist" data-page-tabs aria-label="Hardware evaluation"><button id="hardware-playback-tab" role="tab" aria-selected="true" aria-controls="hardware-playback">Videos &amp; force plots</button><button id="hardware-summary-tab" role="tab" aria-selected="false" aria-controls="hardware-summary-panel" tabindex="-1">Force summary</button></div>
+    <div id="hardware-playback" role="tabpanel" aria-labelledby="hardware-playback-tab" tabindex="0">
+    <p class="hardware-source-note" id="hardware-force-evaluation">Hardware demonstrations and 45 instrumented trials. Video and force playback are independent recordings.</p>
+    <article class="hardware-task" data-hardware-task="boxpickup" aria-labelledby="hardware-boxpickup-title">
+     <h3 id="hardware-boxpickup-title">Box pickup</h3>
+     <div class="hardware-task-grid">
+      <figure class="hardware-motion"><video id="hardware-boxpickup-video" controls playsinline preload="none" width="1620" height="1080" poster="./assets/hardware-video/boxpickup.webp" aria-label="Box pickup hardware demonstration"><source src="./assets/hardware-video/boxpickup.mp4" type="video/mp4"><a href="./assets/hardware-video/boxpickup.mp4">Box pickup video</a></video><figcaption>Whole-body pickup on Digit. The force recordings compare the right-hand contact force under three language instructions.</figcaption></figure>
+      <div class="hardware-force" aria-label="Box pickup force recordings"><p class="hardware-load-status" role="status">Loading force recordings...</p></div>
+     </div>
+    </article>
+    <article class="hardware-task" data-hardware-task="shelfbox" aria-labelledby="hardware-shelfbox-title">
+     <h3 id="hardware-shelfbox-title">Shelf-box pushing</h3>
+     <div class="hardware-task-grid">
+      <figure class="hardware-motion"><video id="hardware-shelfbox-video" controls playsinline preload="none" width="1620" height="1080" poster="./assets/hardware-video/shelfbox.webp" aria-label="Shelf-box pushing hardware demonstration"><source src="./assets/hardware-video/shelfbox.mp4" type="video/mp4"><a href="./assets/hardware-video/shelfbox.mp4">Shelf-box pushing video</a></video><figcaption>Whole-body pushing against the shelf wall. Language specifies the force level as well as the manipulation task.</figcaption></figure>
+      <div class="hardware-force" aria-label="Shelf-box pushing force recordings"><p class="hardware-load-status" role="status">Loading force recordings...</p></div>
+     </div>
+    </article>
+    <article class="hardware-task" data-hardware-task="tablewipe" aria-labelledby="hardware-tablewipe-title">
+     <h3 id="hardware-tablewipe-title">Surface wiping</h3>
+     <div class="hardware-task-grid">
+      <figure class="hardware-motion"><video id="hardware-tablewipe-video" controls playsinline preload="none" width="1620" height="1080" poster="./assets/hardware-video/tablewipe.webp" aria-label="Surface wiping hardware demonstration"><source src="./assets/hardware-video/tablewipe.mp4" type="video/mp4"><a href="./assets/hardware-video/tablewipe.mp4">Surface wiping video</a></video><figcaption>Maintaining surface contact throughout the wiping motion.</figcaption></figure>
+      <div class="hardware-force" aria-label="Surface wiping force recordings"><p class="hardware-load-status" role="status">Loading force recordings...</p></div>
+     </div>
+    </article>
+    </div>
+    <section class="hardware-summary" id="hardware-summary-panel" role="tabpanel" aria-labelledby="hardware-summary-tab" tabindex="0" hidden><h3>Force levels across all hardware trials</h3><p>Mean ± between-trial standard deviation in newtons; each trial has equal weight. Pickup uses the final 2 s of loaded holding, shelf pushing the detected main-contact phase, and wiping the estimated contact/command overlap before 17 s. One gentle shelf trial lacked valid main contact (4/5 used); all other groups use 5/5.</p><div class="hardware-summary-scroll"><table><caption>VLA-issued and measured right-hand force</caption><thead><tr><th scope="col">Task</th><th scope="col">Prompt</th><th scope="col">VLA command (N)</th><th scope="col">Measured (N)</th><th scope="col">Trials used</th></tr></thead><tbody id="hardware-summary-rows"></tbody></table></div><p><a href="./assets/hardware-force/examples.json.gz" download>Force traces</a> · <a href="./assets/hardware-force/all-trial-summary.csv" download>Summary CSV</a></p></section>
+   </div>
+   <figure class="hardware-aggregate" id="hardware-aggregate" data-palette="grayscale" aria-labelledby="hardware-aggregate-title">
+    <div class="hardware-aggregate-heading"><h3 id="hardware-aggregate-title">From requested force to realized contact</h3></div>
+    <div class="hardware-aggregate-key"><span><i class="summary-key-command" aria-hidden="true"></i>VLA command</span><span><i class="summary-key-measured" aria-hidden="true"></i>Measured</span></div>
+    <div class="hardware-aggregate-charts"><p class="hardware-aggregate-status" role="status">Loading force summary...</p></div>
+    <figcaption>Mean right-hand normal force over each task's evaluation phase; error bars show between-trial SD. <a href="#hardware-summary-panel">Evaluation windows and values</a>.</figcaption>
+   </figure>
+   <div class="prose hardware-findings"><p id="hardware-findings">Across 30 RL-only trials per task, FCT achieves mean absolute force errors of 1.7 N for box pickup, 3.9 N for shelf-box pushing, and 7.0 N for surface wiping. In 45 closed-loop Opt2VLA trials, the mean VLA-issued commands fall within the intended force regimes, and mean realized forces increase from gentle to firm to strong. Wiping's larger command-to-measurement gap is consistent with the RL-only tracking bias, suggesting that low-level force regulation contributes to the gap even when the VLA selects the intended force level.</p></div>
+  </section>
+
+  <section class="article-section" id="takeaway" aria-labelledby="takeaway-heading">
+   <div class="prose"><h2 id="takeaway-heading">Autonomy includes how the robot interacts.</h2><p>Task completion tells us whether a robot achieved an outcome, not whether it applied the force the instruction called for. Geometry alone leaves that physical interaction under-specified. Opt2VLA makes force an explicit, learnable command, linking language to whole-body execution through physically grounded training and interaction feedback. This shifts the goal from reproducing a motion to specifying and regulating how the robot makes contact.</p></div>
+  </section>
+
+  <section class="article-section" id="citation" aria-labelledby="citation-heading">
+   <div class="citation-heading"><h2 id="citation-heading">BibTeX</h2><button id="copy-citation" type="button" title="Copy BibTeX" hidden><img src="./vendor/lucide/copy.svg" alt="" width="18" height="18">Copy BibTeX</button></div>
+   <p class="citation-note">arXiv:2609.23968 (2026)</p>
+   <pre id="citation-text" tabindex="0" aria-label="BibTeX citation">@misc{liu_opt2vla,
+  title = {{Opt2VLA}: Force-Aware Vision-Language-Action for Contact-Rich Humanoid Whole-Body Manipulation},
+  author = {Liu, Fukang and Chen, Yipu and Jang, Jaehwi and Xu, Danfei and Kira, Zsolt and Zhao, Ye},
+  year = {2026},
+  eprint = {2609.23968},
+  archivePrefix = {arXiv},
+  primaryClass = {cs.RO},
+  url = {https://arxiv.org/abs/2609.23968}
+}</pre>
+   <p id="citation-status" role="status" aria-live="polite"></p>
+  </section>
+  <section class="article-section" id="related-work" aria-labelledby="related-work-heading">
+   <h2 id="related-work-heading">Related Work</h2>
+   <a class="related-project" href="https://opt2skill.github.io/">
+    <span><strong>Opt2Skill</strong><span>Imitating Dynamically-feasible Whole-Body Trajectories for Versatile Humanoid Loco-Manipulation</span></span>
+    <img src="./vendor/lucide/arrow-up-right.svg" alt="" width="24" height="24">
+   </a>
+  </section>
+ </main></div><footer><span>Opt2VLA · Contact-rich humanoid manipulation</span><a href="#overview">Back to overview ↑</a></footer>
+ <details class="appearance-tuner" id="appearance-tuner" hidden>
+  <summary aria-label="Theme and background blur" title="Theme and background blur"><img class="appearance-sun" src="./vendor/lucide/sun.svg" alt="" width="22" height="22"><img class="appearance-moon" src="./vendor/lucide/moon.svg" alt="" width="22" height="22"></summary>
+  <div class="appearance-controls" role="region" aria-label="Theme and background blur">
+   <div class="theme-switch" id="theme-switch" role="group" aria-label="Color theme">
+  <button id="appearance-theme-day" type="button" aria-label="Light theme" aria-pressed="false" title="Light theme"><img src="./vendor/lucide/sun.svg" alt="" width="22" height="22"><span class="theme-tooltip" aria-hidden="true">Light theme</span></button>
+  <button id="appearance-theme-night" type="button" aria-label="Dark theme" aria-pressed="true" title="Dark theme"><img src="./vendor/lucide/moon.svg" alt="" width="22" height="22"><span class="theme-tooltip" aria-hidden="true">Dark theme</span></button>
+   </div>
+   <label for="appearance-background"><span>Background blur <output id="appearance-background-value" for="appearance-background">6 px</output></span><input id="appearance-background" type="range" min="0" max="16" step="0.5" value="6"></label>
+  </div>
+ </details>
+ <script type="module" src="./appearance.js"></script>
+ <script type="module" src="./publication.js"></script>
+ <script type="module" src="./hardware-media.js"></script>
+ <script type="module" src="./hardware-force.js"></script>
+ <script type="module" src="./page-layout.js"></script>
+ <link rel="stylesheet" href="./controller.css">
+ <script type="module" src="./results.js"></script>
+ <script type="module" src="./hero.js"></script>
+ <script type="module" src="./intro-story.js"></script>
+ <script type="module" src="./progress.js"></script>
+ <script type="module" src="./controller-ui.js"></script>
+ <script type="module" src="./architecture-3d.js"></script>
+ <script type="module" src="./system.js"></script>
+ <script type="module" src="./data-collection.js"></script>
+</body>
+</html>
